@@ -36,3 +36,13 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+
+#root > div > div > div.d-flex.justify-content-center.align-items-center.flex-column.container-fluid > div > form > div > input{
+
+  border: 0;
+}
+
+
