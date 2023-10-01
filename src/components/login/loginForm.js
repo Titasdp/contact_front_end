@@ -3,17 +3,19 @@ import {
   exec_login_user,
   exec_get_user_info,
 } from "../../utils/api/users/usersController";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { add_value } from "../../utils/storage/loggedUserSlice";
 import { exec_get_user_contacts } from "../../utils/api/contacts/contactController";
+import AxiosResponseErrors from "../../utils/customeErrors/axiosResponse";
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const [email, set_email] = useState("");
   const [password, set_password] = useState("");
   const dispatch = useDispatch();
+  const [submit_runnig, set_submit_runnig] = useState(false);
 
   const move_to_register = () => {
     navigate("/register");
@@ -29,68 +31,75 @@ const LoginForm = () => {
 
   const handle_submit = async (e) => {
     e.preventDefault();
-
-    const exec_result = await exec_login_user(email, password);
-    if (exec_result.resp_code < 300) {
-      const get_contact_exec_result = await exec_get_user_contacts(
-        exec_result.data.process_result.user_id,
-        exec_result.data.process_result.token
-      );
-
-      const user_info = await exec_get_user_info(
-        exec_result.data.process_result.user_id,
-        exec_result.data.process_result.token
-      );
-
-      await dispatch(
-        add_value({
-          user_token: exec_result.data.process_result.token,
-          user_id: exec_result.data.process_result.user_id,
-          user_contacts: get_contact_exec_result.data.process_result.contacts,
-          user_information: user_info.data.process_result.user,
-        })
-      );
-
-      toast.success(`Give as a min to prepare everyting, welcome back ....`, {
-        style: {
-          borderRadius: "10px",
-          background: "",
-          color: "#fff",
-          duration: 4000,
+    try {
+      set_submit_runnig(true);
+      await toast.promise(handle_api_requests(), {
+        loading: "Loading...",
+        success: (message) => {
+          return message;
+        },
+        error: (error) => {
+          return "Login failed";
         },
       });
+
       setTimeout(() => {
-        navigate("/"); // Redirect to the login page after the delay
-      }, 6000);
-    } else if (exec_result.resp_code >= 400 && exec_result.resp_code < 500) {
-      exec_result.data.process_result.forEach((item) => {
-        toast.error(`${item.message} `, {
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-            duration: 4000,
-          },
-        });
-      });
-      toast.error(` ${exec_result.data.message}`, {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-          duration: 4000,
-        },
-      });
-    } else {
-      toast.error(`Something when wrong please restart the application `, {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-          duration: 2000,
-        },
-      });
+        navigate("/");
+      }, 1000);
+    } catch (custom_error) {
+      if ([400, 422, 404].includes(custom_error.status_code))
+        for (const err of custom_error.errors) {
+          toast.error(`${err.message} `, {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          });
+        }
     }
+
+    set_submit_runnig(false);
+  };
+
+  const handle_api_requests = async () => {
+    return new Promise(async (resolve, reject) => {
+      await setTimeout(async () => {
+        const exec_result = await exec_login_user(email, password);
+        if (exec_result.resp_code === 200) {
+          //Todo - > validate this process
+          const get_contact_exec_result = await exec_get_user_contacts(
+            exec_result.data.process_result.user_id,
+            exec_result.data.process_result.token
+          );
+
+          //Todo - > validate this process
+          const user_info = await exec_get_user_info(
+            exec_result.data.process_result.user_id,
+            exec_result.data.process_result.token
+          );
+
+          await dispatch(
+            add_value({
+              user_token: exec_result.data.process_result.token,
+              user_id: exec_result.data.process_result.user_id,
+              user_contacts:
+                get_contact_exec_result.data.process_result.contacts,
+              user_information: user_info.data.process_result.user,
+            })
+          );
+
+          resolve(exec_result.data.message);
+        } else if ([400, 422, 404].includes(exec_result.resp_code)) {
+          const array_of_errors = exec_result.data.process_result;
+          reject(
+            new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
+          );
+        } else {
+          // Error page must be added
+        }
+      }, 1000);
+    });
   };
 
   return (
@@ -128,7 +137,11 @@ const LoginForm = () => {
             <br />
           </div>
 
-          <button className="btn btn btn-outline-secondary mr-2" type="submit">
+          <button
+            className="btn btn btn-outline-secondary mr-2"
+            type="submit"
+            disabled={submit_runnig}
+          >
             LOGIN
           </button>
         </form>

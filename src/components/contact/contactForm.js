@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
-function ContactForm({initial_name ,initial_email,initial_locality, initial_phone_numb, initial_obs ,init_address, on_submit , id}) {
+function ContactForm({initial_name ,initial_email,initial_locality, initial_phone_numb, initial_obs ,initial_address, on_submit , id}) {
   const [email, set_email] = useState(initial_email);
   const [full_name, set_name] = useState(initial_name);
   const [locality, set_locality] = useState(initial_locality);
-  const [address, set_address] = useState(init_address)
+  const [address, set_address] = useState(initial_address)
   const [phone_numb, set_phone_numb] = useState(initial_phone_numb);
   const [obs, set_obs] = useState(initial_obs);
 
@@ -48,7 +48,6 @@ function ContactForm({initial_name ,initial_email,initial_locality, initial_phon
   return (
     <div>
       <h2>Edit Contact</h2>
-
       <form onSubmit={handle_submit}>
         <input
           id="email"
@@ -105,7 +104,7 @@ function ContactForm({initial_name ,initial_email,initial_locality, initial_phon
           required
         />
 
-        <button type="submit">Create Contact</button>
+        <button type="submit">UPDATE CONTACT</button>
       </form>
     </div>
   );

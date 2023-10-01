@@ -21,29 +21,30 @@ export default function DashboardHome() {
       style={{ height: "100vh" }}
     >
       <div className="text-center">
-      
         <h1 className="">WELCOME TO THE DASHBOARD</h1>
         <p className="">
           This is our app dashboard please select one of the option bellow:
         </p>
         <div className="d-flex justify-content-between">
-        <button className="btn btn-outline-secondary mr-2" onClick={move_to_profile}>
-          MY PROFILE
-        </button>
-
-
-      
-        <button className="btn btn-outline-secondary mr-2" onClick={move_to_password_manager}>
-          PASSWORD
-        </button>
-
-
-
-
-
-        
-        <button className="btn btn btn-outline-secondary mr-2" onClick={move_to_contact_dashboard}>MY CONTACTS</button>
-      </div>
+          <button
+            className="btn btn-outline-secondary mr-2"
+            onClick={move_to_profile}
+          >
+            MY PROFILE
+          </button>
+          <button
+            className="btn btn-outline-secondary mr-2"
+            onClick={move_to_password_manager}
+          >
+            PASSWORD
+          </button>
+          <button
+            className="btn btn btn-outline-secondary mr-2"
+            onClick={move_to_contact_dashboard}
+          >
+            MY CONTACTS
+          </button>
+        </div>
       </div>
     </div>
   );

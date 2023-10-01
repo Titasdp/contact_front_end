@@ -3,25 +3,10 @@ import ContactForm from "./contactForm";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { TiEdit } from "react-icons/ti";
 
-
-
-
-
 const Contact = ({ contacts, remove_contact, update_contact }) => {
   const user_id = "";
   const sumbite_update = (values) => {
-    update_contact(values)
-
-    
-
-
-
-    
-
-
-
-
-
+    update_contact(values);
     set_edit({
       id: null,
       value: "",
@@ -33,7 +18,18 @@ const Contact = ({ contacts, remove_contact, update_contact }) => {
   });
 
   if (edit.id) {
-    return <ContactForm   initial_name={edit.value.full_name}  initial_email={edit.value.email}   initial_address={edit.value.address}  initial_locality={edit.value.locality} initial_phone_numb={edit.value.phone_numb}  initial_obs= {edit.value.obs} on_submit={sumbite_update} id= {edit.id} />;
+    return (
+      <ContactForm
+        initial_name={edit.value.full_name}
+        initial_email={edit.value.email}
+        initial_locality={edit.value.locality}
+        initial_address={edit.value.address}
+        initial_phone_numb={edit.value.phone_numb}
+        initial_obs={edit.value.obs}
+        on_submit={sumbite_update}
+        id={edit.id}
+      />
+    );
   }
 
   return contacts.map((contact, index) => (

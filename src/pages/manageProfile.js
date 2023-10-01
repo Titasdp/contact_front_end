@@ -9,123 +9,123 @@ import { useNavigate } from "react-router-dom";
 import { add_value } from "../utils/storage/loggedUserSlice";
 import { TiEdit } from "react-icons/ti";
 import EditProfileForm from "../components/profile/editProfileForm";
-
+import AxiosResponseErrors from "../utils/customeErrors/axiosResponse";
 
 export default function ManageProfile() {
-
   const navigate = useNavigate();
-  let logged_user_info = useSelector((state) => state.loggedUser.value);
+  const [submit_running, set_submit_running] = useState(false);
   const dispatch = useDispatch();
-  const submite_update =  async (values) => {
+  let logged_user_info = useSelector((state) => state.loggedUser.value);
 
-    
-    const exec_result = await exec_update_user(
-      values.user_id,
-      values.full_name,
-      values.locality,
-      values.age,
-      values.phone_numb,
-      logged_user_info.user_token
-    )
+  const submite_update = async (values) => {
+    try {
+      set_submit_running(true);
+      await toast.promise(handle_api_requests(values), {
+        loading: "Updating...",
+        success: (message) => {
+          return message;
+        },
+        error: (error) => {
+          return "Update profile process failed";
+        },
+      });
+ 
+      set_edit({
+        id: null,
+        value: "",
+      });
 
-    if (exec_result.resp_code < 300) {
-      const user_info = await exec_get_user_info(
-        logged_user_info.user_id,
-        logged_user_info.user_token
-      );
-
-
-
-      await dispatch(
-        add_value({
-          user_token: logged_user_info.user_token,
-          user_id: logged_user_info.user_id,
-          user_contacts: logged_user_info.user_contacts,
-          user_information:user_info.data.process_result.user,
-        })
-      );
-
-    } else if (exec_result.resp_code >= 400) {
-      const array_of_errors = exec_result.data.process_result;
-      for (const err of array_of_errors) {
-        toast.error(`${err.error_message} `, {
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-            duration: 2000,
-          },
-        });
-      }
-    } else {
+    } catch (custom_error) {
+      if ([400, 422, 404].includes(custom_error.status_code))
+        for (const err of custom_error.errors) {
+          toast.error(`${err.message} `, {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          });
+        }
     }
+
+
+    set_submit_running(false);
+  };
+
+
+  const on_cancel = async () => {
     set_edit({
       id: null,
       value: "",
     });
   };
 
-  const on_cancel =  async (values) => {
-    const exec_result = await exec_update_user(
-      values.user_id,
-      values.full_name,
-      values.locality,
-      values.age,
-      values.phone_numb,
-      logged_user_info.user_token
-    )
+  const handle_api_requests = async (values) => {
+    return new Promise(async (resolve, reject) => {
+      await setTimeout(async () => {
+        const exec_result = await exec_update_user(
+          values.user_id,
+          values.full_name,
+          values.locality,
+          values.age,
+          values.phone_numb,
+          logged_user_info.user_token
+        );
 
+        if (exec_result.resp_code === 200) {
+          //Todo - > validate this process
+          const user_info = await exec_get_user_info(
+            logged_user_info.user_id,
+            logged_user_info.user_token
+          );
 
+          await dispatch(
+            add_value({
+              user_token: logged_user_info.user_token,
+              user_id: logged_user_info.user_id,
+              user_contacts: logged_user_info.user_contacts,
+              user_information: user_info.data.process_result.user,
+            })
+          );
 
-    if (exec_result.resp_code < 300) {
-  
-      let updated_logged_user_info = logged_user_info.user_information;
-      updated_logged_user_info.phone_numb = values.phone_numb
-      updated_logged_user_info.full_name =values.full_name
-      updated_logged_user_info.age =values.age
-      updated_logged_user_info.locality =values.locality
-      
-      await dispatch(
-        add_value({
-          user_token: logged_user_info.user_token,
-          user_id: logged_user_info.user_id,
-          user_contacts: logged_user_info.user_contacts,
-          user_information:updated_logged_user_info,
-        })
-      );
-    } else if (exec_result.resp_code >= 400) {
-      const array_of_errors = exec_result.data.process_result;
-      for (const err of array_of_errors) {
-        toast.error(`${err.error_message} `, {
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-            duration: 2000,
-          },
-        });
-      }
-    } else {
-    }
-
-    set_edit({
-      id: null,
-      value: "",
+          resolve(exec_result.data.message);
+        } else if ([400, 422, 404].includes(exec_result.resp_code)) {
+          const array_of_errors = exec_result.data.process_result;
+          reject(
+            new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
+          );
+        } else {
+          // Error page must be added
+        }
+      }, 1000);
     });
   };
+
+
+  const move_home = () => {
+    navigate("/");
+  };
+
   const [edit, set_edit] = useState({
     id: null,
     value: "",
   });
 
   if (edit.id) {
-    return <EditProfileForm initial_name={edit.value.full_name}  initial_locality={edit.value.locality} initial_phone_numb={edit.value.phone_numb}  initial_age = {edit.value.age} on_submit={submite_update} on_cancel={on_cancel} user_id= {edit.id}  />;
+    return (
+      <EditProfileForm
+        initial_name={edit.value.full_name}
+        initial_locality={edit.value.locality}
+        initial_phone_numb={edit.value.phone_numb}
+        initial_age={edit.value.age}
+        on_submit={submite_update}
+        on_cancel={on_cancel}
+        user_id={edit.id}
+        submit_running = {submit_running}
+        set_submit_running = {set_submit_running}
+      />
+    );
   }
-
-
-  const move_home = () => {
-    navigate("/");
-  };
 
   return (
     <div>
@@ -150,7 +150,6 @@ export default function ManageProfile() {
             <strong>Age :</strong>
             {logged_user_info.user_information.age}
           </p>
-
 
           <p className="">
             <strong>Phone Number :</strong>

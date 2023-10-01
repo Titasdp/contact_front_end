@@ -71,16 +71,17 @@ export const exec_patch_password = async (
   user_id,
   password_confirmation,
   new_password,
-  old_passowrd,
+  old_password,
   token
 ) => {
+
 
 
   const exec_result = await execute_request(
     token,
     {
       password_confirmation: password_confirmation,
-      old_passowrd: old_passowrd,
+      old_password: old_password,
       new_password: new_password,
     },
     `/users/${user_id}/password`,

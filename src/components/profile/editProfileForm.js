@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
-export default function EditProfileForm({initial_name,initial_locality, initial_phone_numb, initial_age , on_submit, on_cancel , user_id}) {
+export default function EditProfileForm({initial_name,initial_locality, initial_phone_numb, initial_age , on_submit, on_cancel , user_id, submit_running  ,set_submit_running}) {
   const [full_name, set_name] = useState(initial_name);
   const [locality, set_locality] = useState(initial_locality);
   const [phone_numb, set_phone_numb] = useState(initial_phone_numb);
@@ -10,7 +10,6 @@ export default function EditProfileForm({initial_name,initial_locality, initial_
 
 
   const handle_change_name = (e) => {
-
     set_name(e.target.value);
   };
 
@@ -25,6 +24,7 @@ export default function EditProfileForm({initial_name,initial_locality, initial_
   const handle_submit = (e) => {
   
     e.preventDefault();
+    set_submit_running(true)
 
     on_submit({
       user_id: user_id,
@@ -77,11 +77,13 @@ export default function EditProfileForm({initial_name,initial_locality, initial_
           value={phone_numb}
           onChange={set_phone_numb}
           required
-          
         />
 
-        <button type="submit">Edit Contact</button>
+        <button type="submit" disabled={submit_running}>UPDATE PROFILE</button>
       </form>
+
+
+      <button  disabled={submit_running}  onClick={on_cancel}> CANCEL</button>
     </div>
   );
 }

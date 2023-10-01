@@ -4,14 +4,17 @@ import "react-phone-number-input/style.css";
 import { exec_register_user } from "../../utils/api/users/usersController";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AxiosResponseErrors from "../../utils/customeErrors/axiosResponse";
 
-const RegisterForm = (props) => {
+const RegisterForm = () => {
   const navigate = useNavigate();
   const [email, set_email] = useState("");
   const [full_name, set_name] = useState("");
   const [locality, set_locality] = useState("");
   const [age, set_age] = useState("");
   const [phone_numb, set_phone_numb] = useState("");
+  const [submit_runnig, set_submit_runnig] = useState(false);
+
   const move_to_login = () => {
     navigate("/login");
   };
@@ -33,42 +36,59 @@ const RegisterForm = (props) => {
 
   const handle_submit = async (e) => {
     e.preventDefault();
-
-    const exec_result = await exec_register_user(
-      email,
-      full_name,
-      locality,
-      age,
-      phone_numb
-    );
-
-    if (exec_result.resp_code < 300) {
-      toast.success(`${exec_result.data.message} `, {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-          duration: 6000,
+    try {
+      set_submit_runnig(true);
+      await toast.promise(handle_api_request(), {
+        loading: "Creating user...",
+        success: (message) => {
+          return message;
+        },
+        error: (error) => {
+          return "Fail To create user";
         },
       });
-
-      setTimeout(() => {
-        navigate("/login"); // Redirect to the login page after the delay
-      }, 6000);
-    } else if (exec_result.resp_code >= 400) {
-      const array_of_errors = exec_result.data.process_result;
-      for (const err of array_of_errors) {
-        toast.error(`${err.error_message} `, {
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-            duration: 2000,
-          },
-        });
-      }
-    } else {
+    } catch (custom_error) {
+      if (custom_error.status_code === 400 || custom_error.status_code === 422)
+        for (const err of custom_error.errors) {
+          toast.error(`${err.message} `, {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          });
+        }
     }
+    set_submit_runnig(false);
+  };
+
+  const handle_api_request = async () => {
+    return new Promise(async (resolve, reject) => {
+      await setTimeout(async () => {
+        const exec_result = await exec_register_user(
+          email,
+          full_name,
+          locality,
+          age,
+          phone_numb
+        );
+
+        console.log("testing", exec_result);
+        if (exec_result.resp_code === 201) {
+          resolve(exec_result.data.message);
+        } else if (
+          exec_result.resp_code === 400 ||
+          exec_result.resp_code === 422
+        ) {
+          const array_of_errors = exec_result.data.process_result;
+          reject(
+            new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
+          );
+        } else {
+          // Error page must be added
+        }
+      }, 1000);
+    });
   };
 
   return (
@@ -127,7 +147,13 @@ const RegisterForm = (props) => {
             value={phone_numb}
             onChange={set_phone_numb}
           />
-          <button className="btn btn btn-outline-secondary mt-4" type="submit">REGISTER</button>
+          <button
+            className="btn btn btn-outline-secondary mt-4"
+            type="submit"
+            disabled={submit_runnig}
+          >
+            REGISTER
+          </button>
         </form>
       </div>
 
@@ -135,7 +161,7 @@ const RegisterForm = (props) => {
         className="btn btn btn-outline-secondary mt-4"
         onClick={move_to_login}
       >
-        CANCEL
+        BACK TO LOGIN
       </button>
     </div>
   );

@@ -9,12 +9,10 @@ export const execute_request = async (
   request_type
 ) => {
   console.log("token before send", access_token);
-  const config = {};
 
   axios.defaults.headers.common["Authorization"] = "Bearer " + access_token;
-
   axios.defaults.headers.common["Content-Type"] = "application/x-www-form-urlencoded";
-
+  console.log("Body testing",body)
 
   try {
     let response = null;
