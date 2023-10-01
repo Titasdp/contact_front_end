@@ -37,6 +37,17 @@
   }
 }
 
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.scrolling-wrapper {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.scrolling-wrapper .col {
+  display: inline-block;
+}
 
 
 

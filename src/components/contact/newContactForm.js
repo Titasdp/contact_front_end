@@ -45,7 +45,7 @@ export default function NewContactForm({ set_contacts, contacts }) {
 
     try {
       await toast.promise(handle_api_requests(), {
-        loading: "Updating...",
+        loading: "Adding contact...",
         success: (message) => {
           set_email("");
           set_name("");
@@ -55,7 +55,7 @@ export default function NewContactForm({ set_contacts, contacts }) {
           return message;
         },
         error: (error) => {
-          return "Password update failed...";
+          return "Failed to add new contact...";
         },
       });
     } catch (custom_error) {

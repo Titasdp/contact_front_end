@@ -10,13 +10,24 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { add_value } from "../../utils/storage/loggedUserSlice";
 import NewContactForm from "./newContactForm";
+import ContactForm from "./contactForm";
 import AxiosResponseErrors from "../../utils/customeErrors/axiosResponse";
 
 const ContactList = () => {
   const dispatch = useDispatch();
   const [contacts_array, set_contacts] = useState([]);
+  const [edit, set_edit] = useState({
+    id: null,
+    value: "",
+  });
+
   let logged_user_info = useSelector((state) => state.loggedUser.value);
   const navigate = useNavigate();
+
+  const move_home = () => {
+    navigate("/");
+  };
+
   useEffect(() => {
     set_contacts(logged_user_info.user_contacts);
   }, []);
@@ -26,6 +37,10 @@ const ContactList = () => {
       await toast.promise(handle_api_request_edit_contact(values), {
         loading: "Updating contact...",
         success: (message) => {
+          set_edit({
+            id: null,
+            value: "",
+          });
           return message;
         },
         error: (error) => {
@@ -44,10 +59,6 @@ const ContactList = () => {
           });
         }
     }
-  };
-
-  const move_home = () => {
-    navigate("/");
   };
 
   const remove_contact = async (id, index) => {
@@ -78,7 +89,6 @@ const ContactList = () => {
   const handle_api_request_remove_contact = async (id) => {
     const id_combination = id.split("//");
     return new Promise(async (resolve, reject) => {
-      console.log("here ");
       await setTimeout(async () => {
         const exec_result = await exec_delete_user_contact(
           id_combination[0],
@@ -153,7 +163,6 @@ const ContactList = () => {
             })
           );
 
-
           set_contacts(get_contact_exec_result.data.process_result.contacts);
 
           resolve(exec_result.data.message);
@@ -169,16 +178,52 @@ const ContactList = () => {
     });
   };
 
+  if (edit.id) {
+    return (
+      <ContactForm
+        initial_name={edit.value.full_name}
+        initial_email={edit.value.email}
+        initial_locality={edit.value.locality}
+        initial_address={edit.value.address}
+        initial_phone_numb={edit.value.phone_numb}
+        initial_obs={edit.value.obs}
+        on_submit={update_contact}
+        id={edit.id}
+      />
+    );
+  }
+
   return (
     <div>
-      <h1>Here is your List of contacts</h1>
+      <h1>List of Contacts</h1>
       {/* <TodoForm onSubmit={addTodo} /> */}
 
-      <Contact
-        contacts={contacts_array}
-        update_contact={update_contact}
-        remove_contact={remove_contact}
-      />
+      <div className="container scrolling-wrapper">
+        <div className="table-wrapper">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Name</th>
+                <th>Locality</th>
+                <th>Address</th>
+                <th>Obs</th>
+                <th>Delete</th>
+                <th>Update</th>
+              </tr>
+            </thead>
+            <tbody>
+              <Contact
+                contacts={contacts_array}
+                update_contact={update_contact}
+                remove_contact={remove_contact}
+                set_edit={set_edit}
+              />
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <NewContactForm set_contacts={set_contacts} contacts={contacts_array} />
 

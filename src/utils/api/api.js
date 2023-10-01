@@ -8,12 +8,8 @@ export const execute_request = async (
   url_sufix,
   request_type
 ) => {
-  console.log("token before send", access_token);
-
   axios.defaults.headers.common["Authorization"] = "Bearer " + access_token;
   axios.defaults.headers.common["Content-Type"] = "application/x-www-form-urlencoded";
-  console.log("Body testing",body)
-
   try {
     let response = null;
     if (request_type === "post") {
@@ -33,9 +29,6 @@ export const execute_request = async (
       response = await axios.patch(url + url_sufix, body);
     }
 
-
-
-   
     return {
       resp_code: response.status,
       data: response.data,
