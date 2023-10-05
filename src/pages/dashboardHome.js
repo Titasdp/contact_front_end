@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import {
+  check_login,
+  force_password_change,
+} from "../utils/navigationRules/navigationRulesCheck";
+import { useSelector, useDispatch } from "react-redux";
+import { update_toastes_trigger_value } from "../utils/storage/toastesTriggersSlice";
 export default function DashboardHome() {
+  const dispatch = useDispatch();
+  let logged_user_info = useSelector((state) => state.loggedUser.value);
   const navigate = useNavigate();
 
   const move_to_profile = () => {
@@ -14,6 +21,15 @@ export default function DashboardHome() {
   const move_to_contact_dashboard = () => {
     navigate("/contacts");
   };
+
+  useEffect(() => {
+    if (!check_login(logged_user_info)) {
+      navigate("/login");
+    }
+    if (force_password_change(logged_user_info)) {
+      navigate("/manage/password");
+    }
+  }, []);
 
   return (
     <div

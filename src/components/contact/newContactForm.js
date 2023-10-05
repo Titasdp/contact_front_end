@@ -59,7 +59,7 @@ export default function NewContactForm({ set_contacts, contacts }) {
         },
       });
     } catch (custom_error) {
-      if ([400, 422, 404].includes(custom_error.status_code))
+      if ([400, 422, 404].includes(custom_error.status_code)){
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -69,6 +69,8 @@ export default function NewContactForm({ set_contacts, contacts }) {
             },
           });
         }
+      }else if(custom_error.status_code===401){
+      }
     }
   };
 
@@ -111,8 +113,10 @@ export default function NewContactForm({ set_contacts, contacts }) {
           reject(
             new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
           );
+        } else if (exec_result.resp_code===401) {
+          new AxiosResponseErrors(exec_result.resp_code, []);
         } else {
-          // Error page must be added
+          new AxiosResponseErrors(exec_result.resp_code, []);
         }
       }, 1000);
     });

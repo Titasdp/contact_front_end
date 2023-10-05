@@ -3,12 +3,12 @@ import ContactForm from "./contactForm";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { TiEdit } from "react-icons/ti";
 
-const Contact = ({ contacts, remove_contact, update_contact ,set_edit }) => {
+const Contact = ({ contacts, remove_contact, update_contact ,set_edit ,start, end,search_query }) => {
   const user_id = "";
 
+console.log(contacts)
 
-
-  return contacts.map((contact, index) => (
+  return (contacts.filter(data => data.full_name.toLowerCase().startsWith(search_query.toLowerCase()))).slice(start, end + 1).map((contact, index) => (
     <tr
       key={`${user_id}//${contact.email}//${contact.phone_numb}`}
     >

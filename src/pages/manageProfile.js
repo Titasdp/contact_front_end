@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   exec_get_user_info,
   exec_update_user,
@@ -10,12 +10,39 @@ import { add_value } from "../utils/storage/loggedUserSlice";
 import { TiEdit } from "react-icons/ti";
 import EditProfileForm from "../components/profile/editProfileForm";
 import AxiosResponseErrors from "../utils/customeErrors/axiosResponse";
+import { update_toastes_trigger_value } from "../utils/storage/toastesTriggersSlice";
+import { force_password_change , check_login} from "../utils/navigationRules/navigationRulesCheck";
 
 export default function ManageProfile() {
+  let logged_user_info = useSelector((state) => state.loggedUser.value);
   const navigate = useNavigate();
   const [submit_running, set_submit_running] = useState(false);
   const dispatch = useDispatch();
-  let logged_user_info = useSelector((state) => state.loggedUser.value);
+
+  const update_toastes_triggers = async (
+    user_expire_trigger,
+    forced_password_change_trigger,
+    forced_loggin_trigger
+  ) => {
+    await dispatch(
+      update_toastes_trigger_value({
+        user_expire_trigger: user_expire_trigger,
+        forced_password_change_trigger: forced_password_change_trigger,
+        forced_loggin_trigger: forced_loggin_trigger,
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (!check_login(logged_user_info)) {
+      update_toastes_triggers(false, false, true);
+      navigate("/login");
+    }
+
+    if (force_password_change(logged_user_info)) {
+      navigate("/manage/password");
+    }
+  }, []);
 
   const submite_update = async (values) => {
     try {
@@ -29,12 +56,11 @@ export default function ManageProfile() {
           return "Update profile process failed";
         },
       });
- 
+
       set_edit({
         id: null,
         value: "",
       });
-
     } catch (custom_error) {
       if ([400, 422, 404].includes(custom_error.status_code))
         for (const err of custom_error.errors) {
@@ -48,10 +74,8 @@ export default function ManageProfile() {
         }
     }
 
-
     set_submit_running(false);
   };
-
 
   const on_cancel = async () => {
     set_edit({
@@ -101,7 +125,6 @@ export default function ManageProfile() {
     });
   };
 
-
   const move_home = () => {
     navigate("/");
   };
@@ -121,8 +144,8 @@ export default function ManageProfile() {
         on_submit={submite_update}
         on_cancel={on_cancel}
         user_id={edit.id}
-        submit_running = {submit_running}
-        set_submit_running = {set_submit_running}
+        submit_running={submit_running}
+        set_submit_running={set_submit_running}
       />
     );
   }

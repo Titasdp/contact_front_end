@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   exec_patch_password,
@@ -8,14 +8,44 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { add_value } from "../../utils/storage/loggedUserSlice";
 import AxiosResponseErrors from "../../utils/customeErrors/axiosResponse";
+import { update_toastes_trigger_value } from "../../utils/storage/toastesTriggersSlice";
+import {
+  check_login,
+  force_password_change,
+} from "../../utils/navigationRules/navigationRulesCheck";
 
 export default function EditPasswordForm() {
   const navigate = useNavigate();
   const [old_passowrd, set_old_passowrd] = useState("");
   const [new_password, set_new_password] = useState("");
   const [password_confirmation, set_password_confirmation] = useState("");
+ 
+
   const dispatch = useDispatch();
   let logged_user_info = useSelector((state) => state.loggedUser.value);
+  let toastes_trigger = useSelector((state) => state.toastesTriggers.value);
+
+
+
+  const trigger_toast = async () => {
+    await toast.error(
+      `Kindly update your automatically generated password to a personalized one.\nThis action is mandatory.`,
+      {
+        style: {
+          borderRadius: "10px",
+          background: "#333",
+          color: "#fff",
+        },
+      }
+    );
+  };
+
+  useEffect(() => {
+    console.log(logged_user_info.user_information.password_generated);
+    if (!check_login(logged_user_info)) {
+      navigate("/login");
+    }
+  }, []);
 
   const handle_old_password_change = (e) => {
     set_old_passowrd(e.target.value);
@@ -101,44 +131,65 @@ export default function EditPasswordForm() {
 
   return (
     <div>
-      <h2>EDIT PASSWORD FORM</h2>
-      <form onSubmit={handle_submit}>
-        <input
-          id="new_password"
-          placeholder="New Password:"
-          type="password"
-          value={new_password}
-          onChange={handle_new_password_change}
-          required
-        />
-        <br />
-        <input
-          id="confirm_password"
-          placeholder="Confirm password:"
-          type="password"
-          value={password_confirmation}
-          onChange={handle_password_confirmation_change}
-          required
-        />
-        <br />
-        <input
-          id="old_password"
-          placeholder="Old password:"
-          type="password"
-          value={old_passowrd}
-          onChange={handle_old_password_change}
-          required
-        />
-        <button type="submit">UPDATE PASSWORD</button>
-      </form>
+      {logged_user_info.user_information.password_generated ? (
+        <div>
+          <p>
+            Kindly update your automatically generated password to a
+            personalized one, this action is mandatory!
+          </p>
+          <p>
+            {" "}
+            When you complete this task, additional functionalities will be
+            unlocked.
+          </p>
+        </div>
+      ) : (
+        <div></div>
+      )}
 
-      <button
-        onClick={function () {
-          navigate("/");
-        }}
-      >
-        GO BACK
-      </button>
+      <div>
+        <h2>EDIT PASSWORD FORM</h2>
+        <form onSubmit={handle_submit}>
+          <input
+            id="new_password"
+            placeholder="New Password:"
+            type="password"
+            value={new_password}
+            onChange={handle_new_password_change}
+            required
+          />
+          <br />
+          <input
+            id="confirm_password"
+            placeholder="Confirm password:"
+            type="password"
+            value={password_confirmation}
+            onChange={handle_password_confirmation_change}
+            required
+          />
+          <br />
+          <input
+            id="old_password"
+            placeholder="Old password:"
+            type="password"
+            value={old_passowrd}
+            onChange={handle_old_password_change}
+            required
+          />
+          <button type="submit">UPDATE PASSWORD</button>
+        </form>
+
+        <button
+          disabled={
+            logged_user_info.user_information.password_generated ? true : false
+          }
+          onClick={function () {
+            navigate("/");
+          }}
+        >
+          GO BACK
+        </button>
+      </div>
     </div>
   );
 }

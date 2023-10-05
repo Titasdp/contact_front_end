@@ -12,25 +12,72 @@ import { add_value } from "../../utils/storage/loggedUserSlice";
 import NewContactForm from "./newContactForm";
 import ContactForm from "./contactForm";
 import AxiosResponseErrors from "../../utils/customeErrors/axiosResponse";
+import {
+  check_login,
+  force_password_change,
+} from "../../utils/navigationRules/navigationRulesCheck";
 
 const ContactList = () => {
+  let logged_user_info = useSelector((state) => state.loggedUser.value);
   const dispatch = useDispatch();
-  const [contacts_array, set_contacts] = useState([]);
+  let [contacts_array, set_contacts] = useState(logged_user_info.user_contacts);
+
+  //Pagination related Variables
+  const items_per_page = 10;
+  let [current_page, set_current_page] = useState(1);
+  let [total_pages, set_total_pages] = useState(
+    Math.ceil(contacts_array.length / items_per_page)
+  );
+  let [start_list_index, set_start_list_index] = useState(
+    (current_page - 1) * items_per_page
+  );
+  let [end_list_index, set_end_list_index] = useState(
+    Math.min(start_list_index + items_per_page - 1, contacts_array.length - 1)
+  );
   const [edit, set_edit] = useState({
     id: null,
     value: "",
   });
+  //Search_related
+  const [search_name_Query, set_search_query] = useState("");
 
-  let logged_user_info = useSelector((state) => state.loggedUser.value);
+  const handle_name_change = (event) => {
+    set_search_query(event.target.value);
+  };
+
   const navigate = useNavigate();
 
   const move_home = () => {
     navigate("/");
   };
 
+  //Define my useEffects
   useEffect(() => {
-    set_contacts(logged_user_info.user_contacts);
+    const startIndex = (current_page - 1) * items_per_page;
+    const endIndex = Math.min(
+      startIndex + items_per_page - 1,
+      contacts_array.length - 1
+    );
+    set_start_list_index(startIndex);
+    set_end_list_index(endIndex);
+    set_total_pages(Math.ceil(contacts_array.length / items_per_page));
+  }, [current_page, contacts_array]);
+
+  useEffect(() => {
+    if (!check_login(logged_user_info)) {
+      navigate("/login");
+    }
+    if (force_password_change(logged_user_info)) {
+      navigate("/manage/password");
+    }
   }, []);
+
+  const handle_page_change = async (increment) => {
+    const newPage = current_page + increment;
+    if (newPage >= 1 && newPage <= total_pages) {
+      await set_current_page(newPage);
+    }
+  };
 
   const update_contact = async (values) => {
     try {
@@ -103,7 +150,7 @@ const ContactList = () => {
             // Define your conditions using logical operators
             return (
               item.email !== id_combination[0] &&
-              item.phone_number !== id_combination[0]
+              item.phone_number !== id_combination[1]
             );
           });
           await dispatch(
@@ -200,7 +247,13 @@ const ContactList = () => {
 
       <div className="container scrolling-wrapper">
         <div className="table-wrapper">
-          <table class="table table-bordered">
+          <input
+            type="text"
+            value={search_name_Query}
+            onChange={handle_name_change}
+            placeholder="Search..."
+          />
+          <table className="table table-bordered">
             <thead>
               <tr>
                 <th>Email</th>
@@ -219,9 +272,28 @@ const ContactList = () => {
                 update_contact={update_contact}
                 remove_contact={remove_contact}
                 set_edit={set_edit}
+                start={start_list_index}
+                end={end_list_index}
+                search_query ={search_name_Query}
               />
             </tbody>
           </table>
+
+          <div>
+            <button
+              onClick={() => handle_page_change(-1)}
+              disabled={current_page === 1}
+            >
+              Previous
+            </button>
+            <span>{`Page ${current_page} of ${total_pages}`}</span>
+            <button
+              onClick={() => handle_page_change(1)}
+              disabled={current_page === total_pages}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 

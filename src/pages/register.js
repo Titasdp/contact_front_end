@@ -5,7 +5,6 @@ import { Toaster } from "react-hot-toast";
 export default function Register() {
   return (
     <div>
-      <Toaster position="top-right"></Toaster>
       <RegisterForm></RegisterForm>
     </div>
   );
