@@ -9,7 +9,7 @@ const Contact = ({
   set_edit,
   start,
   end,
-  search_query,
+  search_query
 }) => {
   const user_id = "";
 
