@@ -23,7 +23,7 @@ const ContactList = () => {
   let [contacts_array, set_contacts] = useState(logged_user_info.user_contacts);
 
   //Pagination related Variables
-  const items_per_page = 10;
+  const items_per_page = 5;
   let [current_page, set_current_page] = useState(1);
   let [total_pages, set_total_pages] = useState(
     Math.ceil(contacts_array.length / items_per_page)
@@ -95,7 +95,7 @@ const ContactList = () => {
         },
       });
     } catch (custom_error) {
-      if ([400, 422, 404].includes(custom_error.status_code))
+      if ([400, 422, 404].includes(custom_error.status_code)) {
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -105,7 +105,37 @@ const ContactList = () => {
             },
           });
         }
+      } else if (custom_error.status_code === 401) {
+        toast.error(
+          `Your session has expired. We are redirecting you to the login page.`,
+          {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          }
+        );
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      } else {
+        toast.error(`Something went wrong. Please try again.`, {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
+      }
     }
+  };
+
+  const on_cancel = async () => {
+    set_edit({
+      id: null,
+      value: "",
+    });
   };
 
   const remove_contact = async (id, index) => {
@@ -120,7 +150,7 @@ const ContactList = () => {
         },
       });
     } catch (custom_error) {
-      if ([400, 422, 404].includes(custom_error.status_code))
+      if ([400, 422, 404].includes(custom_error.status_code)) {
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -130,6 +160,29 @@ const ContactList = () => {
             },
           });
         }
+      } else if (custom_error.status_code === 401) {
+        toast.error(
+          `Your session has expired. We are redirecting you to the login page.`,
+          {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          }
+        );
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      } else {
+        toast.error(`Something went wrong. Please try again.`, {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
+      }
     }
   };
 
@@ -170,8 +223,10 @@ const ContactList = () => {
           reject(
             new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
           );
+        } else if (exec_result.resp_code === 401) {
+          new AxiosResponseErrors(exec_result.resp_code, []);
         } else {
-          // Error page must be added
+          new AxiosResponseErrors(exec_result.resp_code, []);
         }
       }, 1000);
     });
@@ -236,76 +291,85 @@ const ContactList = () => {
         initial_obs={edit.value.obs}
         on_submit={update_contact}
         id={edit.id}
+        on_cancel={on_cancel}
       />
     );
   }
 
   return (
-    <div>
-      <h1>List of Contacts</h1>
-      {/* <TodoForm onSubmit={addTodo} /> */}
+    <>
+      <div className="container-fluid  d-flex justify-content-start align-items-center flex-row">
+        <button className="btn btn-outline-secondary mr-2" onClick={move_home}>
+          GO HOME
+        </button>
 
-      <div className="container scrolling-wrapper">
-        <div className="table-wrapper">
+        <p style={{ padding: "10px 0px", margin: "0px 0px 0px 10px" }}>
+          /dashboard/contacts
+        </p>
+      </div>
+      <div className="container-fluid text-center">
+        <h2>LIST OF CONTACT</h2>
+        <div className="table-wrapper col-md-12 d-flex justify-content-center flex-column">
           <input
+            className="custom_input mb-4 custom_input_no_wrapper rounded gradiant_background"
             type="text"
             value={search_name_Query}
             onChange={handle_name_change}
-            placeholder="Search..."
+            placeholder="Search contact by name..."
           />
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Name</th>
-                <th>Locality</th>
-                <th>Address</th>
-                <th>Obs</th>
-                <th>Delete</th>
-                <th>Update</th>
-              </tr>
-            </thead>
-            <tbody>
-              <Contact
-                contacts={contacts_array}
-                update_contact={update_contact}
-                remove_contact={remove_contact}
-                set_edit={set_edit}
-                start={start_list_index}
-                end={end_list_index}
-                search_query ={search_name_Query}
-              />
-            </tbody>
-          </table>
-
-          <div>
-            <button
-              onClick={() => handle_page_change(-1)}
-              disabled={current_page === 1}
-            >
-              Previous
-            </button>
-            <span>{`Page ${current_page} of ${total_pages}`}</span>
-            <button
-              onClick={() => handle_page_change(1)}
-              disabled={current_page === total_pages}
-            >
-              Next
-            </button>
+        </div>
+        {/* <TodoForm onSubmit={addTodo} /> */}
+        <div className="container-fluid scrolling-wrapper">
+          <div className="table-wrapper col-md-12 d-flex justify-content-start flex-column">
+            <table className="table table-dark text-center">
+              <thead className="gradiant_background">
+                <tr>
+                  <th>EMAIL</th>
+                  <th>PHONE</th>
+                  <th>NAME</th>
+                  <th>LOCALITY</th>
+                  <th>ADDRESS</th>
+                  <th>OBS</th>
+                  <th>DELETE</th>
+                  <th>UPDATE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <Contact
+                  contacts={contacts_array}
+                  update_contact={update_contact}
+                  remove_contact={remove_contact}
+                  set_edit={set_edit}
+                  start={start_list_index}
+                  end={end_list_index}
+                  search_query={search_name_Query}
+                />
+              </tbody>
+            </table>
           </div>
         </div>
+
+        <div>
+          <button
+            className="btn btn-outline-secondary mr-2"
+            onClick={() => handle_page_change(-1)}
+            disabled={current_page === 1}
+          >
+            PREV
+          </button>
+          <span className="">{` Page ${current_page} of ${total_pages} `}</span>
+          <button
+            className="btn btn-outline-secondary ml-2"
+            onClick={() => handle_page_change(1)}
+            disabled={current_page === total_pages}
+          >
+            NEXT
+          </button>
+        </div>
+
+        <NewContactForm set_contacts={set_contacts} contacts={contacts_array} />
       </div>
-
-      <NewContactForm set_contacts={set_contacts} contacts={contacts_array} />
-
-      <button
-        className="btn btn btn-outline-secondary mr-2"
-        onClick={move_home}
-      >
-        GO BACK
-      </button>
-    </div>
+    </>
   );
 };
 

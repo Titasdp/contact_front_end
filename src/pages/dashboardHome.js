@@ -4,10 +4,8 @@ import {
   check_login,
   force_password_change,
 } from "../utils/navigationRules/navigationRulesCheck";
-import { useSelector, useDispatch } from "react-redux";
-import { update_toastes_trigger_value } from "../utils/storage/toastesTriggersSlice";
+import { useSelector } from "react-redux";
 export default function DashboardHome() {
-  const dispatch = useDispatch();
   let logged_user_info = useSelector((state) => state.loggedUser.value);
   const navigate = useNavigate();
 

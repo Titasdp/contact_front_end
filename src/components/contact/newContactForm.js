@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PhoneInput from "react-phone-number-input";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import "react-phone-number-input/style.css";
 import {
   exec_add_user_contact,
@@ -11,6 +12,7 @@ import { add_value } from "../../utils/storage/loggedUserSlice";
 import AxiosResponseErrors from "../../utils/customeErrors/axiosResponse";
 
 export default function NewContactForm({ set_contacts, contacts }) {
+  const navigate = useNavigate();
   const [email, set_email] = useState("");
   const [full_name, set_name] = useState("");
   const [locality, set_locality] = useState("");
@@ -59,7 +61,7 @@ export default function NewContactForm({ set_contacts, contacts }) {
         },
       });
     } catch (custom_error) {
-      if ([400, 422, 404].includes(custom_error.status_code)){
+      if ([400, 422, 404].includes(custom_error.status_code)) {
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -69,7 +71,28 @@ export default function NewContactForm({ set_contacts, contacts }) {
             },
           });
         }
-      }else if(custom_error.status_code===401){
+      } else if (custom_error.status_code === 401) {
+        toast.error(
+          `Your session has expired. We are redirecting you to the login page.`,
+          {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          }
+        );
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
+      } else {
+        toast.error(`Something went wrong. Please try again.`, {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
       }
     }
   };
@@ -113,7 +136,7 @@ export default function NewContactForm({ set_contacts, contacts }) {
           reject(
             new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
           );
-        } else if (exec_result.resp_code===401) {
+        } else if (exec_result.resp_code === 401) {
           new AxiosResponseErrors(exec_result.resp_code, []);
         } else {
           new AxiosResponseErrors(exec_result.resp_code, []);
@@ -123,67 +146,86 @@ export default function NewContactForm({ set_contacts, contacts }) {
   };
 
   return (
-    <div>
-      <h2>Add Contact</h2>
+    <div className="relative d-flex  flex-column container text-center">
+      <div className="p-5 rounded gradiant_background justify-content-center align-items-center mt-5">
+        <h2 className="title">ADD NEW CONTACT</h2>
+        <form onSubmit={handle_submit}>
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              id="email"
+              placeholder="Email:"
+              type="email"
+              value={email}
+              onChange={handle_change_email}
+              required
+            />
+          </div>
+          <br />
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              id="full_name"
+              placeholder="Full Name:"
+              type="text"
+              value={full_name}
+              onChange={handle_change_name}
+              required
+            />
+          </div>
+          <br />
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              placeholder="Locality:"
+              id="locality"
+              type="text"
+              value={locality}
+              onChange={handle_change_locality}
+              required
+            />
+          </div>
+          <br />
 
-      <form onSubmit={handle_submit}>
-        <input
-          id="email"
-          placeholder="Email:"
-          type="email"
-          value={email}
-          onChange={handle_change_email}
-          required
-        />
-        <br />
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              placeholder="Address"
+              id="address"
+              type="text"
+              value={address}
+              onChange={handle_change_address}
+              required
+            />
+          </div>
+          <br />
+          <div className="custom_input_for_text_area">
+            <textarea
+              className="custom_text-area"
+              placeholder="Enter an observation"
+              id="obs"
+              value={obs}
+              onChange={handle_change_obs}
+              required
+            />
+          </div>
+          <br />
 
-        <input
-          id="full_name"
-          placeholder="Full Name:"
-          type="text"
-          value={full_name}
-          onChange={handle_change_name}
-          required
-        />
-        <br />
+          <div className="custom_input-group">
+            <PhoneInput
+              className="d-flex flex-row"
+              placeholder="Enter phone number"
+              value={phone_numb}
+              onChange={set_phone_numb}
+              required
+            />
+          </div>
 
-        <input
-          placeholder="Locality:"
-          id="locality"
-          type="text"
-          value={locality}
-          onChange={handle_change_locality}
-          required
-        />
-        <br />
-        <input
-          placeholder="Address"
-          id="address"
-          type="text"
-          value={address}
-          onChange={handle_change_address}
-          required
-        />
-        <br />
-
-        <textarea
-          placeholder="Enter an observation"
-          id="obs"
-          value={obs}
-          onChange={handle_change_obs}
-          required
-        />
-        <br />
-
-        <PhoneInput
-          placeholder="Enter phone number"
-          value={phone_numb}
-          onChange={set_phone_numb}
-          required
-        />
-
-        <button type="submit">Create Contact</button>
-      </form>
+          <button type="submit" className="btn btn-light mt-4">
+            CREATE CONTACT
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

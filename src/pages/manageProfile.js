@@ -11,7 +11,10 @@ import { TiEdit } from "react-icons/ti";
 import EditProfileForm from "../components/profile/editProfileForm";
 import AxiosResponseErrors from "../utils/customeErrors/axiosResponse";
 import { update_toastes_trigger_value } from "../utils/storage/toastesTriggersSlice";
-import { force_password_change , check_login} from "../utils/navigationRules/navigationRulesCheck";
+import {
+  force_password_change,
+  check_login,
+} from "../utils/navigationRules/navigationRulesCheck";
 
 export default function ManageProfile() {
   let logged_user_info = useSelector((state) => state.loggedUser.value);
@@ -151,12 +154,27 @@ export default function ManageProfile() {
   }
 
   return (
-    <div>
-      <div className="container mt-5">
-        <div className="card">
-          <h1>USER PROFILE</h1>
+    <>
+      <div className="container-fluid  d-flex justify-content-start align-items-center flex-row">
+        <button
+          className="btn btn-outline-secondary mr-2"
+          onClick={function () {
+            move_home();
+          }}
+        >
+          GO HOME
+        </button>
 
-          <p className="">
+        <p style={{ padding: "10px 0px", margin: "0px 0px 0px 10px" }}>
+          /dashboard/profile
+        </p>
+      </div>
+
+      <div className="relative d-flex flex-column container text-center">
+        <div className="p-5 rounded gradiant_background justify-content-center align-items-center mt-5">
+          <h2>USER PROFILE</h2>
+
+          <p className="profile_info_line">
             <strong>Email :</strong>
             {logged_user_info.user_information.full_name}
           </p>
@@ -179,7 +197,8 @@ export default function ManageProfile() {
             {logged_user_info.user_information.phone_numb}
           </p>
 
-          <div className="icons">
+          <p className="icons">
+            <strong>Edit profile :</strong>
             <TiEdit
               onClick={() =>
                 set_edit({
@@ -192,13 +211,11 @@ export default function ManageProfile() {
                   },
                 })
               }
-              className="edit-icon"
+              className="profile_edit_svg"
             />
-          </div>
-
-          <button onClick={move_home}>GO BACK</button>
+          </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }

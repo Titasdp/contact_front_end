@@ -104,16 +104,16 @@ const LoginForm = () => {
 
   return (
     <div
-      className="d-flex justify-content-center align-items-center flex-column container-fluid"
+      className="d-flex justify-content-center align-items-center flex-column container-fluid text-center"
       style={{ height: "100vh" }}
     >
-      <div className="text-center mg-">
+      <div className="p-5 rounded gradiant_background justify-content-center align-items-center mt-5">
         <h2>LOGIN FORM</h2>
 
         <form onSubmit={handle_submit}>
-          <div className="form-group">
+          <div className="custom_input-group">
             <input
-              className="form-control form-control-lg"
+              className="custom_input"
               id="email"
               placeholder="Email:"
               type="email"
@@ -121,12 +121,12 @@ const LoginForm = () => {
               onChange={handle_change_email}
               required
             />
-            <br />
           </div>
+          <br />
 
-          <div className="form-group">
+          <div className="custom_input-group">
             <input
-              className="form-control form-control-lg"
+              className="custom_input"
               id="password"
               placeholder="password:"
               type="password"
@@ -134,26 +134,26 @@ const LoginForm = () => {
               onChange={handle_change_password}
               required
             />
-            <br />
           </div>
 
+          <br />
+
           <button
-            className="btn btn btn-outline-secondary mr-2"
+            className="btn btn-light mt-4"
             type="submit"
             disabled={submit_runnig}
           >
             LOGIN
           </button>
         </form>
+        <button
+          className="btn btn-light mt-4"
+          type="submit"
+          onClick={move_to_register}
+        >
+          REGISTER NOW
+        </button>
       </div>
-
-      <button
-        className="btn btn btn-outline-secondary mt-4"
-        type="submit"
-        onClick={move_to_register}
-      >
-        REGISTER NOW
-      </button>
     </div>
   );
 };

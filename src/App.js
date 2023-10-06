@@ -13,7 +13,7 @@ import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
-    <div className="bg-light">
+    <div className="bg-dark text-light">
       <Toaster position="top-right"></Toaster>
       <Router>
         <Routes>

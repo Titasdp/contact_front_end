@@ -93,76 +93,83 @@ const RegisterForm = () => {
 
   return (
     <div
-      className="d-flex justify-content-center align-items-center flex-column container-fluid"
+      className="d-flex justify-content-center align-items-center flex-column container-fluid text-center"
       style={{ height: "100vh" }}
     >
-      <div className="text-center mg-">
+      <div className="p-5 rounded gradiant_background justify-content-center align-items-center mt-5">
         <h2>REGISTER FORM</h2>
         <form onSubmit={handle_submit}>
-          <input
-            className="form-control form-control-lg"
-            id="email"
-            placeholder="Email:"
-            type="email"
-            value={email}
-            onChange={handle_change_email}
-            required
-          />
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              id="email"
+              placeholder="Email:"
+              type="email"
+              value={email}
+              onChange={handle_change_email}
+              required
+            />
+          </div>
+          <br />
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              id="full_name"
+              placeholder="Full Name:"
+              type="text"
+              value={full_name}
+              onChange={handle_change_name}
+              required
+            />
+          </div>
+          <br />
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              placeholder="Locality:"
+              id="locality"
+              type="text"
+              value={locality}
+              onChange={handle_change_locality}
+              required
+            />
+          </div>
           <br />
 
-          <input
-            className="form-control form-control-lg"
-            id="full_name"
-            placeholder="Full Name:"
-            type="text"
-            value={full_name}
-            onChange={handle_change_name}
-            required
-          />
-          <br />
-          <input
-            className="form-control form-control-lg"
-            placeholder="Locality:"
-            id="locality"
-            type="text"
-            value={locality}
-            onChange={handle_change_locality}
-            required
-          />
-          <br />
-          <input
-            className="form-control form-control-lg"
-            placeholder="Age"
-            id="age"
-            type="number"
-            value={age}
-            onChange={handle_change_age}
-            required
-          />
-          <br />
+          <div className="custom_input-group">
+            <input
+              className="custom_input"
+              placeholder="Age"
+              id="age"
+              type="number"
+              value={age}
+              onChange={handle_change_age}
+              required
+            />
+          </div>
 
-          <PhoneInput
-            placeholder="Enter phone number"
-            className="form-control form-control-lg d-flex flex-row"
-            value={phone_numb}
-            onChange={set_phone_numb}
-          />
+          <br />
+          <div className="custom_input-group">
+            <PhoneInput
+              placeholder="Enter phone number"
+              className="d-flex flex-row"
+              value={phone_numb}
+              onChange={set_phone_numb}
+            />
+          </div>
           <button
-            className="btn btn btn-outline-secondary mt-4"
+            className="btn btn-light"
             type="submit"
             disabled={submit_runnig}
           >
             REGISTER
           </button>
         </form>
-      </div>
 
-      <button
-        className="btn btn btn-outline-secondary mt-4"
-        onClick={move_to_login}
-      >
-        BACK TO LOGIN
-      </button>
+        <button className="btn btn-light mt-4" onClick={move_to_login}>
+          BACK TO LOGIN
+        </button>
+      </div>
     </div>
   );
 };

@@ -19,26 +19,10 @@ export default function EditPasswordForm() {
   const [old_passowrd, set_old_passowrd] = useState("");
   const [new_password, set_new_password] = useState("");
   const [password_confirmation, set_password_confirmation] = useState("");
- 
 
   const dispatch = useDispatch();
   let logged_user_info = useSelector((state) => state.loggedUser.value);
-  let toastes_trigger = useSelector((state) => state.toastesTriggers.value);
 
-
-
-  const trigger_toast = async () => {
-    await toast.error(
-      `Kindly update your automatically generated password to a personalized one.\nThis action is mandatory.`,
-      {
-        style: {
-          borderRadius: "10px",
-          background: "#333",
-          color: "#fff",
-        },
-      }
-    );
-  };
 
   useEffect(() => {
     console.log(logged_user_info.user_information.password_generated);
@@ -147,39 +131,9 @@ export default function EditPasswordForm() {
         <div></div>
       )}
 
-      <div>
-        <h2>EDIT PASSWORD FORM</h2>
-        <form onSubmit={handle_submit}>
-          <input
-            id="new_password"
-            placeholder="New Password:"
-            type="password"
-            value={new_password}
-            onChange={handle_new_password_change}
-            required
-          />
-          <br />
-          <input
-            id="confirm_password"
-            placeholder="Confirm password:"
-            type="password"
-            value={password_confirmation}
-            onChange={handle_password_confirmation_change}
-            required
-          />
-          <br />
-          <input
-            id="old_password"
-            placeholder="Old password:"
-            type="password"
-            value={old_passowrd}
-            onChange={handle_old_password_change}
-            required
-          />
-          <button type="submit">UPDATE PASSWORD</button>
-        </form>
-
+      <div className="container-fluid  d-flex justify-content-start align-items-center flex-row">
         <button
+          className="btn btn-outline-secondary mr-2"
           disabled={
             logged_user_info.user_information.password_generated ? true : false
           }
@@ -187,8 +141,61 @@ export default function EditPasswordForm() {
             navigate("/");
           }}
         >
-          GO BACK
+          GO HOME
         </button>
+
+        <p style={{ padding: "10px 0px", margin: "0px 0px 0px 10px" }}>
+          /dasboard/password/update
+        </p>
+      </div>
+
+      <div className="relative d-flex flex-column container text-center">
+        <div className="p-5 rounded gradiant_background justify-content-center align-items-center mt-5">
+          <h2>EDIT PASSWORD FORM</h2>
+          <form onSubmit={handle_submit}>
+            <div className="custom_input-group">
+              <input
+                className="custom_input"
+                id="new_password"
+                placeholder="New Password:"
+                type="password"
+                value={new_password}
+                onChange={handle_new_password_change}
+                required
+              />
+            </div>
+            <br />
+
+            <div className="custom_input-group">
+              <input
+                className="custom_input"
+                id="confirm_password"
+                placeholder="Confirm password:"
+                type="password"
+                value={password_confirmation}
+                onChange={handle_password_confirmation_change}
+                required
+              />
+            </div>
+
+            <br />
+
+            <div className="custom_input-group">
+              <input
+                className="custom_input"
+                id="old_password"
+                placeholder="Old password:"
+                type="password"
+                value={old_passowrd}
+                onChange={handle_old_password_change}
+                required
+              />
+            </div>
+            <button className="btn btn-light mt-4" type="submit">
+              UPDATE PASSWORD
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
