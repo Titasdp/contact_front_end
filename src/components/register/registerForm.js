@@ -47,6 +47,8 @@ const RegisterForm = () => {
           return "Failed to create User.";
         },
       });
+
+      move_to_login();
     } catch (custom_error) {
       if (
         custom_error.status_code === 400 ||

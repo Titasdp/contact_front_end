@@ -8,11 +8,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { add_value } from "../../utils/storage/loggedUserSlice";
 import AxiosResponseErrors from "../../utils/customeErrors/axiosResponse";
-import { update_toastes_trigger_value } from "../../utils/storage/toastesTriggersSlice";
-import {
-  check_login,
-  force_password_change,
-} from "../../utils/navigationRules/navigationRulesCheck";
+import { check_login } from "../../utils/navigationRules/navigationRulesCheck";
 
 export default function EditPasswordForm() {
   const navigate = useNavigate();
@@ -59,7 +55,6 @@ export default function EditPasswordForm() {
       });
     } catch (custom_error) {
       if ([400, 422, 404].includes(custom_error.status_code)) {
-  
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -70,14 +65,17 @@ export default function EditPasswordForm() {
           });
         }
       } else if ([401].includes(custom_error.status_code)) {
-        toast.error(`Your session has expired. We are redirecting you to the login page.`, {
-          style: {
-            borderRadius: "10px",
-            background: "#333",
-            color: "#fff",
-          },
-          autoClose: 4000,
-        });
+        toast.error(
+          `Your session has expired. We are redirecting you to the login page.`,
+          {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+            autoClose: 4000,
+          }
+        );
 
         await dispatch(
           add_value({
@@ -137,7 +135,6 @@ export default function EditPasswordForm() {
 
         resolve(exec_result.data.message);
       } else if ([400, 422, 404].includes(exec_result.resp_code)) {
-
         const array_of_errors = exec_result.data.process_result;
         reject(new AxiosResponseErrors(exec_result.resp_code, array_of_errors));
       } else {
@@ -149,16 +146,13 @@ export default function EditPasswordForm() {
   return (
     <div>
       {logged_user_info.user_information.password_generated ? (
-        <div>
+        <div className="container-fluid bg-danger text-center ">
           <p>
             Kindly update your automatically generated password to a
-            personalized one, this action is mandatory!
+            personalized one, this action is mandatory! When you complete this
+            task, additional functionalities will be unlocked.
           </p>
-          <p>
-            {" "}
-            When you complete this task, additional functionalities will be
-            unlocked.
-          </p>
+          <p> </p>
         </div>
       ) : (
         <div></div>

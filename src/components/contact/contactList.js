@@ -41,6 +41,8 @@ const ContactList = () => {
   //Search_related
   const [search_name_Query, set_search_query] = useState("");
 
+
+
   const handle_name_change = (event) => {
     set_search_query(event.target.value);
   };
