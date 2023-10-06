@@ -24,7 +24,6 @@ export default function EditPasswordForm() {
   let logged_user_info = useSelector((state) => state.loggedUser.value);
 
   useEffect(() => {
-    console.log(logged_user_info.user_information.password_generated);
     if (!check_login(logged_user_info)) {
       navigate("/login");
     }
@@ -117,9 +116,6 @@ export default function EditPasswordForm() {
         logged_user_info.user_token
       );
 
-
-      console.log("exec result",exec_result)
-
       if (exec_result.resp_code === 200) {
         //Todo - > validate this process
         const user_info = await exec_get_user_info(
@@ -141,7 +137,7 @@ export default function EditPasswordForm() {
 
         resolve(exec_result.data.message);
       } else if ([400, 422, 404].includes(exec_result.resp_code)) {
-        console.log()
+
         const array_of_errors = exec_result.data.process_result;
         reject(new AxiosResponseErrors(exec_result.resp_code, array_of_errors));
       } else {

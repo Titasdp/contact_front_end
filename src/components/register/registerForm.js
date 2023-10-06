@@ -87,8 +87,6 @@ const RegisterForm = () => {
           age,
           phone_numb
         );
-
-        console.log("testing", exec_result);
         if (exec_result.resp_code === 201) {
           resolve(exec_result.data.message);
         } else if (

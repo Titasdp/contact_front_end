@@ -13,8 +13,6 @@ const Contact = ({
 }) => {
   const user_id = "";
 
-  console.log(contacts);
-
   return contacts
     .filter((data) =>
       data.full_name.toLowerCase().startsWith(search_query.toLowerCase())
