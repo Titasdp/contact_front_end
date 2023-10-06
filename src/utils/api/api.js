@@ -9,7 +9,8 @@ export const execute_request = async (
   request_type
 ) => {
   axios.defaults.headers.common["Authorization"] = "Bearer " + access_token;
-  axios.defaults.headers.common["Content-Type"] = "application/x-www-form-urlencoded";
+  axios.defaults.headers.common["Content-Type"] =
+    "application/x-www-form-urlencoded";
   try {
     let response = null;
     if (request_type === "post") {
@@ -34,7 +35,12 @@ export const execute_request = async (
       data: response.data,
     };
   } catch (error) {
-
+    if (error.code === "ERR_NETWORK") {
+      return {
+        resp_code: 500,
+        data: [],
+      };
+    }
     return {
       resp_code: error.response.status,
       data: error.response.data,

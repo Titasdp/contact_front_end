@@ -44,11 +44,14 @@ const RegisterForm = () => {
           return message;
         },
         error: (error) => {
-          return "Fail To create user";
+          return "Failed to create User.";
         },
       });
     } catch (custom_error) {
-      if (custom_error.status_code === 400 || custom_error.status_code === 422)
+      if (
+        custom_error.status_code === 400 ||
+        custom_error.status_code === 422
+      ) {
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -58,6 +61,18 @@ const RegisterForm = () => {
             },
           });
         }
+      } else {
+        toast.error(
+          `An issue occurred. Please try again. If the problem persists, contact our support team.`,
+          {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          }
+        );
+      }
     }
     set_submit_runnig(false);
   };
@@ -85,7 +100,7 @@ const RegisterForm = () => {
             new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
           );
         } else {
-          // Error page must be added
+          reject(new AxiosResponseErrors(exec_result.resp_code, []));
         }
       }, 1000);
     });

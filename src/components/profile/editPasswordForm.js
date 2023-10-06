@@ -23,7 +23,6 @@ export default function EditPasswordForm() {
   const dispatch = useDispatch();
   let logged_user_info = useSelector((state) => state.loggedUser.value);
 
-
   useEffect(() => {
     console.log(logged_user_info.user_information.password_generated);
     if (!check_login(logged_user_info)) {
@@ -60,7 +59,8 @@ export default function EditPasswordForm() {
         },
       });
     } catch (custom_error) {
-      if ([400, 422, 404].includes(custom_error.status_code))
+      if ([400, 422, 404].includes(custom_error.status_code)) {
+  
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -70,46 +70,83 @@ export default function EditPasswordForm() {
             },
           });
         }
+      } else if ([401].includes(custom_error.status_code)) {
+        toast.error(`Your session has expired. We are redirecting you to the login page.`, {
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+          autoClose: 4000,
+        });
+
+        await dispatch(
+          add_value({
+            user_token: "",
+            user_id: "",
+            user_contacts: [],
+            user_information: "",
+          })
+        );
+
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
+      } else {
+        toast.error(
+          `An issue occurred. Please try again. If the problem persists, contact our support team.`,
+          {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          }
+        );
+      }
     }
   };
 
   const handle_api_requests = async () => {
     return new Promise(async (resolve, reject) => {
-      await setTimeout(async () => {
-        const exec_result = await exec_patch_password(
+      const exec_result = await exec_patch_password(
+        logged_user_info.user_id,
+        password_confirmation,
+        new_password,
+        old_passowrd,
+        logged_user_info.user_token
+      );
+
+
+      console.log("exec result",exec_result)
+
+      if (exec_result.resp_code === 200) {
+        //Todo - > validate this process
+        const user_info = await exec_get_user_info(
           logged_user_info.user_id,
-          password_confirmation,
-          new_password,
-          old_passowrd,
           logged_user_info.user_token
         );
-
-        if (exec_result.resp_code === 200) {
-          //Todo - > validate this process
-          const user_info = await exec_get_user_info(
-            logged_user_info.user_id,
-            logged_user_info.user_token
-          );
-
-          await dispatch(
-            add_value({
-              user_token: logged_user_info.user_token,
-              user_id: logged_user_info.user_id,
-              user_contacts: logged_user_info.user_contacts,
-              user_information: user_info.data.process_result.user,
-            })
-          );
-
-          resolve(exec_result.data.message);
-        } else if ([400, 422, 404].includes(exec_result.resp_code)) {
-          const array_of_errors = exec_result.data.process_result;
-          reject(
-            new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
-          );
-        } else {
-          // Error page must be added
+        if (user_info.resp_code !== 200) {
+          reject(new AxiosResponseErrors(500, []));
         }
-      }, 1000);
+
+        await dispatch(
+          add_value({
+            user_token: logged_user_info.user_token,
+            user_id: logged_user_info.user_id,
+            user_contacts: logged_user_info.user_contacts,
+            user_information: user_info.data.process_result.user,
+          })
+        );
+
+        resolve(exec_result.data.message);
+      } else if ([400, 422, 404].includes(exec_result.resp_code)) {
+        console.log()
+        const array_of_errors = exec_result.data.process_result;
+        reject(new AxiosResponseErrors(exec_result.resp_code, array_of_errors));
+      } else {
+        reject(new AxiosResponseErrors(exec_result.resp_code, []));
+      }
     });
   };
 

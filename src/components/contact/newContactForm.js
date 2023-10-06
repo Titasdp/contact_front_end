@@ -84,7 +84,7 @@ export default function NewContactForm({ set_contacts, contacts }) {
         );
         setTimeout(() => {
           navigate("/");
-        }, 2000);
+        }, 3000);
       } else {
         toast.error(`Something went wrong. Please try again.`, {
           style: {
@@ -99,49 +99,44 @@ export default function NewContactForm({ set_contacts, contacts }) {
 
   const handle_api_requests = async () => {
     return new Promise(async (resolve, reject) => {
-      await setTimeout(async () => {
-        const exec_result = await exec_add_user_contact(
-          email,
-          full_name,
-          locality,
-          obs,
-          phone_numb,
-          address,
+      const exec_result = await exec_add_user_contact(
+        email,
+        full_name,
+        locality,
+        obs,
+        phone_numb,
+        address,
+        logged_user_info.user_id,
+        logged_user_info.user_token
+      );
+
+      if (exec_result.resp_code === 201) {
+        //Todo - > validate this process
+        const get_contact_exec_result = await exec_get_user_contacts(
           logged_user_info.user_id,
           logged_user_info.user_token
         );
 
-        if (exec_result.resp_code === 201) {
-          //Todo - > validate this process
-          const get_contact_exec_result = await exec_get_user_contacts(
-            logged_user_info.user_id,
-            logged_user_info.user_token
-          );
+        await dispatch(
+          add_value({
+            user_token: logged_user_info.user_token,
+            user_id: logged_user_info.user_id,
+            user_contacts: get_contact_exec_result.data.process_result.contacts,
+            user_information: logged_user_info.user_information,
+          })
+        );
 
-          await dispatch(
-            add_value({
-              user_token: logged_user_info.user_token,
-              user_id: logged_user_info.user_id,
-              user_contacts:
-                get_contact_exec_result.data.process_result.contacts,
-              user_information: logged_user_info.user_information,
-            })
-          );
+        set_contacts(get_contact_exec_result.data.process_result.contacts);
 
-          set_contacts(get_contact_exec_result.data.process_result.contacts);
-
-          resolve(exec_result.data.message);
-        } else if ([400, 422, 404].includes(exec_result.resp_code)) {
-          const array_of_errors = exec_result.data.process_result;
-          reject(
-            new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
-          );
-        } else if (exec_result.resp_code === 401) {
-          new AxiosResponseErrors(exec_result.resp_code, []);
-        } else {
-          new AxiosResponseErrors(exec_result.resp_code, []);
-        }
-      }, 1000);
+        resolve(exec_result.data.message);
+      } else if ([400, 422, 404].includes(exec_result.resp_code)) {
+        const array_of_errors = exec_result.data.process_result;
+        reject(new AxiosResponseErrors(exec_result.resp_code, array_of_errors));
+      } else if (exec_result.resp_code === 401) {
+        new AxiosResponseErrors(exec_result.resp_code, []);
+      } else {
+        new AxiosResponseErrors(exec_result.resp_code, []);
+      }
     });
   };
 

@@ -47,7 +47,7 @@ const LoginForm = () => {
         navigate("/");
       }, 1000);
     } catch (custom_error) {
-      if ([400, 422, 404].includes(custom_error.status_code))
+      if ([400, 422, 404].includes(custom_error.status_code)) {
         for (const err of custom_error.errors) {
           toast.error(`${err.message} `, {
             style: {
@@ -57,8 +57,19 @@ const LoginForm = () => {
             },
           });
         }
+      } else {
+        toast.error(
+          `An issue occurred. Please try again. If the problem persists, contact our support team.`,
+          {
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+            },
+          }
+        );
+      }
     }
-
     set_submit_runnig(false);
   };
 
@@ -72,12 +83,18 @@ const LoginForm = () => {
             exec_result.data.process_result.user_id,
             exec_result.data.process_result.token
           );
-
           //Todo - > validate this process
           const user_info = await exec_get_user_info(
             exec_result.data.process_result.user_id,
             exec_result.data.process_result.token
           );
+          if (user_info.resp_code !== 200) {
+            reject(new AxiosResponseErrors(500, []));
+          }
+
+          if (user_info.resp_code !== 200) {
+            reject(new AxiosResponseErrors(500, []));
+          }
 
           await dispatch(
             add_value({
@@ -96,7 +113,7 @@ const LoginForm = () => {
             new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
           );
         } else {
-          // Error page must be added
+          reject(new AxiosResponseErrors(exec_result.resp_code, []));
         }
       }, 1000);
     });

@@ -23,7 +23,7 @@ const ContactList = () => {
   let [contacts_array, set_contacts] = useState(logged_user_info.user_contacts);
 
   //Pagination related Variables
-  const items_per_page = 5;
+  const items_per_page = 10;
   let [current_page, set_current_page] = useState(1);
   let [total_pages, set_total_pages] = useState(
     Math.ceil(contacts_array.length / items_per_page)
@@ -70,7 +70,7 @@ const ContactList = () => {
     if (force_password_change(logged_user_info)) {
       navigate("/manage/password");
     }
-  }, []);
+  });
 
   const handle_page_change = async (increment) => {
     const newPage = current_page + increment;
@@ -189,94 +189,85 @@ const ContactList = () => {
   const handle_api_request_remove_contact = async (id) => {
     const id_combination = id.split("//");
     return new Promise(async (resolve, reject) => {
-      await setTimeout(async () => {
-        const exec_result = await exec_delete_user_contact(
-          id_combination[0],
-          id_combination[1],
-          logged_user_info.user_id,
-          logged_user_info.user_token
+      const exec_result = await exec_delete_user_contact(
+        id_combination[0],
+        id_combination[1],
+        logged_user_info.user_id,
+        logged_user_info.user_token
+      );
+
+      if (exec_result.resp_code === 200) {
+        //Todo - > validate this process
+        const new_array = contacts_array.filter((item) => {
+          // Define your conditions using logical operators
+          return (
+            item.email !== id_combination[0] &&
+            item.phone_number !== id_combination[1]
+          );
+        });
+        await dispatch(
+          add_value({
+            user_token: logged_user_info.user_token,
+            user_id: logged_user_info.user_id,
+            user_contacts: new_array,
+            user_information: logged_user_info.user_information,
+          })
         );
 
-        if (exec_result.resp_code === 200) {
-          //Todo - > validate this process
-          const new_array = contacts_array.filter((item) => {
-            // Define your conditions using logical operators
-            return (
-              item.email !== id_combination[0] &&
-              item.phone_number !== id_combination[1]
-            );
-          });
-          await dispatch(
-            add_value({
-              user_token: logged_user_info.user_token,
-              user_id: logged_user_info.user_id,
-              user_contacts: new_array,
-              user_information: logged_user_info.user_information,
-            })
-          );
+        set_contacts(new_array);
 
-          set_contacts(new_array);
-
-          resolve(exec_result.data.message);
-        } else if ([400, 422, 404].includes(exec_result.resp_code)) {
-          const array_of_errors = exec_result.data.process_result;
-          reject(
-            new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
-          );
-        } else if (exec_result.resp_code === 401) {
-          new AxiosResponseErrors(exec_result.resp_code, []);
-        } else {
-          new AxiosResponseErrors(exec_result.resp_code, []);
-        }
-      }, 1000);
+        resolve(exec_result.data.message);
+      } else if ([400, 422, 404].includes(exec_result.resp_code)) {
+        const array_of_errors = exec_result.data.process_result;
+        reject(new AxiosResponseErrors(exec_result.resp_code, array_of_errors));
+      } else if (exec_result.resp_code === 401) {
+        new AxiosResponseErrors(exec_result.resp_code, []);
+      } else {
+        new AxiosResponseErrors(exec_result.resp_code, []);
+      }
     });
   };
 
   const handle_api_request_edit_contact = async (values) => {
     return new Promise(async (resolve, reject) => {
-      await setTimeout(async () => {
-        const exec_result = await exec_update_user_contact(
-          values.old_email,
-          values.old_phone_numb,
-          values.email,
-          values.full_name,
-          values.locality,
-          values.obs,
-          values.phone_numb,
-          values.address,
+      const exec_result = await exec_update_user_contact(
+        values.old_email,
+        values.old_phone_numb,
+        values.email,
+        values.full_name,
+        values.locality,
+        values.obs,
+        values.phone_numb,
+        values.address,
+        logged_user_info.user_id,
+        logged_user_info.user_token
+      );
+
+      if (exec_result.resp_code === 200) {
+        //Todo - > validate this process
+        const get_contact_exec_result = await exec_get_user_contacts(
           logged_user_info.user_id,
           logged_user_info.user_token
         );
 
-        if (exec_result.resp_code === 200) {
-          //Todo - > validate this process
-          const get_contact_exec_result = await exec_get_user_contacts(
-            logged_user_info.user_id,
-            logged_user_info.user_token
-          );
+        await dispatch(
+          add_value({
+            user_token: logged_user_info.user_token,
+            user_id: logged_user_info.user_id,
+            user_contacts: get_contact_exec_result.data.process_result.contacts,
+            user_information: logged_user_info.user_information,
+          })
+        );
 
-          await dispatch(
-            add_value({
-              user_token: logged_user_info.user_token,
-              user_id: logged_user_info.user_id,
-              user_contacts:
-                get_contact_exec_result.data.process_result.contacts,
-              user_information: logged_user_info.user_information,
-            })
-          );
+        set_contacts(get_contact_exec_result.data.process_result.contacts);
 
-          set_contacts(get_contact_exec_result.data.process_result.contacts);
-
-          resolve(exec_result.data.message);
-        } else if ([400, 422, 404].includes(exec_result.resp_code)) {
-          const array_of_errors = exec_result.data.process_result;
-          reject(
-            new AxiosResponseErrors(exec_result.resp_code, array_of_errors)
-          );
-        } else {
-          // Error page must be added
-        }
-      }, 1000);
+        resolve(exec_result.data.message);
+      } else if ([400, 422, 404].includes(exec_result.resp_code)) {
+        const array_of_errors = exec_result.data.process_result;
+        reject(new AxiosResponseErrors(exec_result.resp_code, array_of_errors));
+      } else {
+        reject(new AxiosResponseErrors(exec_result.resp_code, []));
+      }
     });
   };
 
@@ -349,7 +340,7 @@ const ContactList = () => {
           </div>
         </div>
 
-        <div>
+        <div className="mt-5">
           <button
             className="btn btn-outline-secondary mr-2"
             onClick={() => handle_page_change(-1)}
